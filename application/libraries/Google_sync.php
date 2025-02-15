@@ -428,44 +428,75 @@ class Google_sync
      */
     public function get_add_to_google_url(int $appointment_id): string
     {
+        // 1) Récupérer toutes les infos (rdv, service, provider, customer).
         $appointment = $this->CI->appointments_model->find($appointment_id);
-
-        $service = $this->CI->services_model->find($appointment['id_services']);
-
-        $provider = $this->CI->providers_model->find($appointment['id_users_provider']);
-
-        $customer = $this->CI->customers_model->find($appointment['id_users_customer']);
-
-        $provider_timezone_instance = new DateTimeZone($provider['timezone']);
-
-        $utc_timezone_instance = new DateTimeZone('UTC');
-
-        $appointment_start_instance = new DateTime($appointment['start_datetime'], $provider_timezone_instance);
-
-        $appointment_start_instance->setTimezone($utc_timezone_instance);
-
-        $appointment_end_instance = new DateTime($appointment['end_datetime'], $provider_timezone_instance);
-
-        $appointment_end_instance->setTimezone($utc_timezone_instance);
-
+        $service     = $this->CI->services_model->find($appointment['id_services']);
+        $provider    = $this->CI->providers_model->find($appointment['id_users_provider']);
+        $customer    = $this->CI->customers_model->find($appointment['id_users_customer']);
+    
+        // 2) Convertir les dates en UTC pour Google Calendar.
+        $provider_timezone      = new DateTimeZone($provider['timezone']);
+        $utc_timezone_instance  = new DateTimeZone('UTC');
+        
+        $start_dt = new DateTime($appointment['start_datetime'], $provider_timezone);
+        $start_dt->setTimezone($utc_timezone_instance);
+    
+        $end_dt = new DateTime($appointment['end_datetime'], $provider_timezone);
+        $end_dt->setTimezone($utc_timezone_instance);
+    
+        // 3) Participants à ajouter dans le paramètre "add"
         $add = [$provider['email']];
-
         if (!empty($customer['email'])) {
             $add[] = $customer['email'];
         }
-
-        $add_to_google_url_params = [
-            'action' => 'TEMPLATE',
-            'text' => $service['name'],
-            'dates' =>
-                $appointment_start_instance->format('Ymd\THis\Z') .
-                '/' .
-                $appointment_end_instance->format('Ymd\THis\Z'),
-            'location' => setting('company_name'),
-            'details' => 'View/Change Appointment: ' . site_url('booking/reschedule/' . $appointment['hash']),
-            'add' => implode(', ', $add),
+    
+        // 4) Construire le champ "location" avec l'adresse du provider
+        //    (comme vous l’avez fait dans le ICS).
+        $google_location = trim($provider['address'] . ', ' . $provider['city'] . ' ' . $provider['zip_code']);
+        if (empty($google_location)) {
+            // fallback éventuel
+            $google_location = setting('company_name');
+        }
+    
+        // 5) Construire la chaîne "details" un peu plus personnalisée
+        //    Google Calendar interprète les sauts de ligne (encodés en %0A) pour le param `details`.
+        $reschedule_link = site_url('booking/reschedule/' . $appointment['hash']);
+        $details_lines   = [
+            //  - Titre / description
+            "Service : " . $service['name'],
+            //  - Infos provider
+            "Praticien : " . $provider['first_name'] . ' ' . $provider['last_name'],
+            "Email : " . $provider['email'],
+            "Téléphone : " . $provider['phone_number'],
+            "",
+            //  - Instructions
+            "Merci d'arriver 5 minutes avant l'heure du rendez-vous.",
+            "",
+            //  - Lien pour reprogrammer
+            "Reprogrammez votre rendez-vous ici : $reschedule_link",
         ];
-
+        // On assemble en une seule chaîne avec des sauts de ligne
+        $details_string = implode("\n", $details_lines);
+    
+        // 6) Construction des paramètres GET pour Google Calendar
+        $add_to_google_url_params = [
+            'action'  => 'TEMPLATE',
+            // "text" est le Titre de l'événement
+            'text'    => $service['name'],
+            // "dates" se met au format "YYYYMMDDTHHMMSSZ/YYYYMMDDTHHMMSSZ" en UTC
+            'dates'   =>
+                $start_dt->format('Ymd\THis\Z') .
+                '/' .
+                $end_dt->format('Ymd\THis\Z'),
+            // "location" : l'adresse (provider)
+            'location' => $google_location,
+            // "details" : la description
+            'details'  => $details_string,
+            // "add" : participants
+            'add'     => implode(',', $add), // virgules ou espaces
+        ];
+    
+        // 7) On génère l’URL final
         return 'https://calendar.google.com/calendar/render?' . http_build_query($add_to_google_url_params);
     }
 }
