@@ -230,7 +230,7 @@ class Email_messages
 
         $php_mailer->isHTML();
         $php_mailer->CharSet = 'UTF-8';
-        $php_mailer->SMTPDebug = config('smtp_debug') ? SMTP::DEBUG_SERVER : null;
+        $php_mailer->SMTPDebug = 0;
 
         if (config('protocol') === 'smtp') {
             $php_mailer->isSMTP();
