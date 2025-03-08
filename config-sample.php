@@ -52,4 +52,15 @@ class Config
     const GOOGLE_CLIENT_SECRET = '';
     const GOOGLE_API_KEY = '';
 
+    // ------------------------------------------------------------------------
+    // ODOO SETTINGS
+    // ------------------------------------------------------------------------
+
+    const ODOO_URL      = 'http://odoo.host:8069';   // URL d'Odoo
+    const ODOO_DB       = 'odoodb';                  // Nom de la base Odoo
+    const ODOO_USERNAME = 'odoouser';                        // Identifiant Odoo
+    const ODOO_PASSWORD = 'odoopass';                     // Mot de passe Odoo
+    const ODOO_EMAIL    = 'email@example.com';         // Email partenaire par défaut
+
+
 }
