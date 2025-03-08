@@ -63,4 +63,26 @@ class Config
     const ODOO_EMAIL    = 'email@example.com';         // Email partenaire par défaut
 
 
+
+    // ------------------------------------------------------------------------
+    // EMAIL SETTINGS
+    // ------------------------------------------------------------------------
+
+    const SMTP_USERAGENT = 'Easy!Appointments';
+    const SMTP_PROTOCOL  = 'smtp';
+    const SMTP_MAILTYPE  = 'html';
+    const SMTP_DEBUG     = '1';
+    const SMTP_AUTH      = true;
+    const SMTP_HOST      = '';
+    const SMTP_USER      = '';
+    const SMTP_PASS      = '';
+    const SMTP_CRYPTO    = 'ssl';
+    const SMTP_PORT      = 465;
+    const SMTP_CRLF      = "\r\n";
+    const SMTP_NEWLINE   = "\r\n";
+    const FROM_NAME      = ""          //Optional
+    const FROM_ADDRESS   = ""          //Optional
+    const REPLY_TO       =  ""         //Optional
+
+
 }
