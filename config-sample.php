@@ -80,9 +80,9 @@ class Config
     const SMTP_PORT      = 465;
     const SMTP_CRLF      = "\r\n";
     const SMTP_NEWLINE   = "\r\n";
-    const FROM_NAME      = ""          //Optional
-    const FROM_ADDRESS   = ""          //Optional
-    const REPLY_TO       =  ""         //Optional
+    const FROM_NAME      = "";          //Optional
+    const FROM_ADDRESS   = "";          //Optional
+    const REPLY_TO       =  "";         //Optional
 
 
 }
