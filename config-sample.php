@@ -30,7 +30,7 @@ class Config
     // GENERAL SETTINGS
     // ------------------------------------------------------------------------
 
-    const BASE_URL = 'http://test.dnsinfo.fr/easyappointments/';
+    const BASE_URL = 'http://test.dnsinfo.fr/easyappointments/'; // Need '/' at the end
     const LANGUAGE = 'english';
     const DEBUG_MODE = true;
 
